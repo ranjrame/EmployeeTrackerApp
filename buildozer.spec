@@ -21,7 +21,7 @@ warn_on_root = 1
 
 [app.android]
 # Add this to your buildozer.spec under [app] section
-android.sdk_path = /home/runner/work/EmployeeTrackerApp/EmployeeTrackerApp/android-sdk
+android.sdk_path = /home/runner/work/EmployeeTrackerApp/android-sdk
 
-android.ndk_path = /home/runner/work/EmployeeTrackerApp/EmployeeTrackerApp/android-ndk
+android.ndk_path = /home/runner/work/EmployeeTrackerApp/android-ndk
 
