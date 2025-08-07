@@ -14,5 +14,8 @@ log_level = 2
 warn_on_root = 1
 
 [app.android]
+# Add this to your buildozer.spec under [app] section
 android.sdk_path = /home/runner/work/EmployeeTrackerApp/EmployeeTrackerApp/android-sdk
-android.ndk_path = /home/runner/.buildozer/android/platform/android-ndk-r25b
+
+android.ndk_path = /home/runner/work/EmployeeTrackerApp/EmployeeTrackerApp/android-ndk
+
