@@ -7,14 +7,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      ANDROID_HOME: ${{ github.workspace }}/android-sdk
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+      PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/android-sdk/platform-tools:${{ github.workspace }}/android-sdk/emulator:${{ env.PATH }}
+
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
       - name: Install Dependencies
         run: |
@@ -23,33 +28,27 @@ jobs:
             libjpeg-dev zlib1g-dev libsqlite3-dev curl
 
           pip install --upgrade pip
-          pip install cython buildozer
+          pip install buildozer cython
 
-      - name: Install Android SDK + AIDL
+      - name: Download Android SDK Command-line Tools
         run: |
-          mkdir -p ~/.android
-          touch ~/.android/repositories.cfg
-
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          cd $HOME/android-sdk/cmdline-tools
-
+          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
           curl -o tools.zip https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip
-          unzip tools.zip -d latest
+          unzip tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools/latest
           rm tools.zip
 
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
-          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
-
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-31" "build-tools;33.0.2"
+      - name: Install Android SDK Packages
+        run: |
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-31" "build-tools;33.0.2"
 
       - name: Build APK
         run: |
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
-          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
-
-          cd EmployeeTrackerApp  # 🔁 replace with your app folder name
+          cd EmployeeTrackerApp  # change this to your actual app folder name
           buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
+        with:
+          name: employee-tracker-apk
+          path: EmployeeTrackerApp/bin/*.apk
