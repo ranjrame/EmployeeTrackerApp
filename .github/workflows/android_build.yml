@@ -20,7 +20,6 @@ jobs:
           python3-pip \
           build-essential \
           ccache \
-          libncursesw5 \
           libstdc++6 \
           libffi-dev \
           libssl-dev \
