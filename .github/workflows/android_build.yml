@@ -27,7 +27,11 @@ jobs:
         pip install buildozer
         pip install cython
         sudo apt-get update
-        sudo apt-get install -y autoconf automake libtool
+        sudo apt-get install -y autoconf automake libtool libtool-bin pkg-config
+        
+    - name: Upgrade buildozer and python-for-android
+      run: |
+        pip install --upgrade buildozer python-for-android   
 
     - name: Install Android SDK (command line tools)
       run: |
@@ -46,7 +50,7 @@ jobs:
         export ANDROIDSDK=$HOME/android-sdk
         export ANDROIDNDK=$HOME/.buildozer/android/platform/android-ndk-r25b
         export PATH=$ANDROIDSDK/platform-tools:$ANDROIDSDK/cmdline-tools/latest/bin:$PATH
-        buildozer android debug
+        buildozer android debug --clean
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
