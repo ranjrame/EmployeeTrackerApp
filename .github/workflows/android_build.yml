@@ -29,6 +29,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y autoconf automake libtool libtool-bin pkg-config build-essential
         
+    - name: Regenerate configure scripts (if present)
+      run: |
+        if [ -f configure.ac ]; then
+        autoreconf --install --force
+        fi       
+        
     - name: Upgrade buildozer and python-for-android
       run: |
         pip install --upgrade pip
