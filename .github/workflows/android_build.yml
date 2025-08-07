@@ -46,7 +46,7 @@ jobs:
 
       - name: Build APK
         run: |
-          cd EmployeeTrackerApp  # change to your app folder if needed
+          
           buildozer android debug
 
       - name: Upload APK
