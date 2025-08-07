@@ -1,6 +1,8 @@
-name: Build Android APK
+name: Build APK
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -10,47 +12,40 @@ jobs:
     env:
       ANDROID_HOME: ${{ github.workspace }}/android-sdk
       ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+      PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/android-sdk/platform-tools:${{ github.workspace }}/android-sdk/build-tools/34.0.0:$PATH
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+    - name: Clean previous buildozer cache
+      run: rm -rf .buildozer
 
-      - name: Install Dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y zip unzip openjdk-17-jdk python3-pip libffi-dev libssl-dev \
-            libjpeg-dev zlib1g-dev libsqlite3-dev curl
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
 
-          pip install --upgrade pip
-          pip install buildozer cython
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y unzip zip openjdk-17-jdk libffi-dev libssl-dev libsqlite3-dev zlib1g-dev
+        python -m pip install --upgrade pip
+        pip install buildozer cython
 
-      - name: Download Android SDK Command-line Tools
-        run: |
-          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-          curl -o tools.zip https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip
-          unzip tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools/temp
-          mv $ANDROID_SDK_ROOT/cmdline-tools/temp/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-          rm -rf $ANDROID_SDK_ROOT/cmdline-tools/temp tools.zip
+    - name: Set up Android SDK
+      run: |
+        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/latest
+        curl -o sdk.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+        unzip sdk.zip -d $ANDROID_SDK_ROOT/cmdline-tools/latest
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
-      - name: Install Android SDK Packages
-        run: |
-          echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $GITHUB_ENV
-          source $GITHUB_ENV
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-31" "build-tools;33.0.2"
+    - name: Build APK
+      run: buildozer -v android debug
 
-      - name: Build APK
-        run: |
-          
-          buildozer android debug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: employee-tracker-apk
-          path: EmployeeTrackerApp/bin/*.apk
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: employee-tracker-apk
+        path: bin/*.apk
