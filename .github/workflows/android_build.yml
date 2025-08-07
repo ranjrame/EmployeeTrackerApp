@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout project
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -16,32 +16,49 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install system dependencies
+      - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y \
             zip unzip openjdk-17-jdk python3-pip python3-setuptools \
             libssl-dev libffi-dev libsqlite3-dev zlib1g-dev \
             libbz2-dev libreadline-dev liblzma-dev \
-            libncurses5-dev libncursesw5-dev
+            libncurses5-dev libncursesw5-dev wget
 
-      - name: Install Buildozer and dependencies
+      - name: Install Buildozer
         run: |
           pip install --upgrade pip
           pip install cython virtualenv buildozer
 
-      - name: Initialize buildozer.spec if not exists
+      - name: Install Android SDK manually
+        run: |
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          cd $HOME/android-sdk/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
+          unzip tools.zip -d latest
+          export ANDROID_HOME=$HOME/android-sdk
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+
+      - name: Set environment variables
+        run: |
+          echo "ANDROIDSDK=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
+
+      - name: Initialize Buildozer spec (if needed)
         run: |
           if [ ! -f buildozer.spec ]; then
             buildozer init
           fi
 
-      - name: Configure buildozer.spec
+      - name: Patch buildozer.spec
         run: |
           sed -i 's/^# *android.api =.*/android.api = 31/' buildozer.spec
           sed -i 's/^# *android.build_tools_version =.*/android.build_tools_version = 31.0.0/' buildozer.spec
-          sed -i 's/^# *android.minapi =.*/android.minapi = 21/' buildozer.spec
-          sed -i 's/^# *android.permissions =.*/android.permissions = INTERNET/' buildozer.spec
+          sed -i 's/^# *android.sdk_path =.*/android.sdk_path = \$HOME\/android-sdk/' buildozer.spec
+          sed -i 's/^# *android.ndk_path =.*/android.ndk_path = /' buildozer.spec
+          sed -i 's/^# *android.ndk =.*/android.ndk = 25b/' buildozer.spec
 
       - name: Build APK
         run: |
