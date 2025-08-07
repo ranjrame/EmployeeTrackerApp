@@ -33,19 +33,20 @@ jobs:
         run: |
           mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
           curl -o tools.zip https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip
-          unzip tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools/latest
-          rm tools.zip
+          unzip tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools/temp
+          mv $ANDROID_SDK_ROOT/cmdline-tools/temp/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+          rm -rf $ANDROID_SDK_ROOT/cmdline-tools/temp tools.zip
 
       - name: Install Android SDK Packages
         run: |
-          echo "export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $GITHUB_ENV
+          echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $GITHUB_ENV
           source $GITHUB_ENV
           yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
           $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-31" "build-tools;33.0.2"
 
       - name: Build APK
         run: |
-          cd EmployeeTrackerApp  # change this to your app folder
+          cd EmployeeTrackerApp  # change to your app folder if needed
           buildozer android debug
 
       - name: Upload APK
