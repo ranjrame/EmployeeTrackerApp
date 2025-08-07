@@ -8,6 +8,12 @@ version = 1.0
 requirements = python3,kivy,pandas
 orientation = portrait
 osx.kivy_version = 2.3.0
+# (Inside buildozer.spec)
+android.sdk = 24
+android.ndk = 21b
+android.api = 33
+android.accept_sdk_license = True
+
 
 [buildozer]
 log_level = 2
