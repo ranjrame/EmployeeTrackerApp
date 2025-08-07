@@ -30,7 +30,7 @@ jobs:
         pip install --upgrade pip
         pip install --upgrade buildozer python-for-android cython
 
-    - name: Regenerate configure scripts if present
+    - name: Optional: Regenerate configure scripts if present
       run: |
         if [ -f configure.ac ]; then
           autoreconf --install --force
@@ -45,7 +45,7 @@ jobs:
         wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
         unzip cmdline-tools.zip
         mv cmdline-tools latest
-        # Fix nested cmdline-tools directory
+        # Fix nested cmdline-tools directory so bin/ is directly under latest/
         if [ -d latest/cmdline-tools ]; then
           mv latest/cmdline-tools/* latest/
           rmdir latest/cmdline-tools
