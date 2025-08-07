@@ -36,7 +36,7 @@ jobs:
           autoreconf --install --force
         fi
 
-    - name: Accept Android SDK licenses and install build tools
+    - name: Install Android SDK (command line tools)
       env:
         ANDROID_SDK_ROOT: $HOME/android-sdk
       run: |
@@ -46,6 +46,7 @@ jobs:
         unzip cmdline-tools.zip
         mv cmdline-tools latest
         export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
+        which sdkmanager
         yes | sdkmanager --licenses
         sdkmanager --install "platform-tools" "platforms;android-31" "build-tools;31.0.0"
 
@@ -56,8 +57,8 @@ jobs:
       env:
         ANDROIDSDK: $HOME/android-sdk
         ANDROID_SDK_ROOT: $HOME/android-sdk
+        PATH: $HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin:${PATH}
       run: |
-        export PATH=$ANDROIDSDK/platform-tools:$ANDROIDSDK/cmdline-tools/latest/bin:$PATH
         buildozer android debug
 
     - name: Upload APK
