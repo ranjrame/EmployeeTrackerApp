@@ -1,14 +1,14 @@
-name: Build APK
+name: Android Build
 
 on:
   push:
     branches:
       - main
+  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -16,31 +16,18 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: 3.10
 
-      - name: Install dependencies
+      - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            build-essential \
-            autoconf \
-            automake \
-            libtool \
-            zip \
-            unzip \
-            libstdc++6 \
-            zlib1g-dev \
-            libffi-dev \
-            libssl-dev \
-            git \
-            openjdk-17-jdk \
-            python3-pip
+          sudo apt-get install -y autoconf automake libtool libtool-bin autotools-dev
 
-      - name: Install Cython and Buildozer
+      - name: Install pip dependencies
         run: |
-          pip install --upgrade pip Cython==0.29.36
-          pip install buildozer
+          python -m pip install --upgrade pip
+          pip install python-for-android kivy pandas
 
-      - name: Build APK
+      - name: Build with python-for-android
         run: |
-          buildozer android debug
+          python -m pythonforandroid.toolchain create --dist_name=employeetracker --bootstrap=sdl2 --requirements=python3,kivy,pandas --arch=arm64-v8a --arch=armeabi-v7a --copy-libs --color=always --storage-dir=.buildozer/android/platform/build-arm64-v8a_armeabi-v7a --ndk-api=21 --ignore-setup-py --debug
