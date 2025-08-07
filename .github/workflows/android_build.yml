@@ -52,13 +52,16 @@ jobs:
         export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
         yes | sdkmanager --licenses
         sdkmanager --install "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+        
+    - name: Clean Buildozer build
+      run: buildozer android clean    
 
     - name: Build APK with Buildozer
       run: |
         export ANDROIDSDK=$HOME/android-sdk
         export ANDROIDNDK=$HOME/.buildozer/android/platform/android-ndk-r25b
         export PATH=$ANDROIDSDK/platform-tools:$ANDROIDSDK/cmdline-tools/latest/bin:$PATH
-        buildozer android debug --clean 
+        buildozer android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
