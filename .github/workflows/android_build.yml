@@ -20,7 +20,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y zip unzip openjdk-17-jdk python3-pip libffi-dev libssl-dev \
-            libjpeg-dev zlib1g-dev libsqlite3-dev libncurses5 curl
+            libjpeg-dev zlib1g-dev libsqlite3-dev curl
 
           pip install --upgrade pip
           pip install cython buildozer
