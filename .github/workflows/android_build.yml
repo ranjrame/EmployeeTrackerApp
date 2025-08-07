@@ -10,7 +10,6 @@ jobs:
     env:
       ANDROID_HOME: ${{ github.workspace }}/android-sdk
       ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
-      PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/android-sdk/platform-tools:${{ github.workspace }}/android-sdk/emulator:${{ env.PATH }}
 
     steps:
       - name: Checkout Repository
@@ -39,12 +38,14 @@ jobs:
 
       - name: Install Android SDK Packages
         run: |
+          echo "export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $GITHUB_ENV
+          source $GITHUB_ENV
           yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
           $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-31" "build-tools;33.0.2"
 
       - name: Build APK
         run: |
-          cd EmployeeTrackerApp  # change this to your actual app folder name
+          cd EmployeeTrackerApp  # change this to your app folder
           buildozer android debug
 
       - name: Upload APK
