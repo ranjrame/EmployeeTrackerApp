@@ -30,7 +30,7 @@ jobs:
         pip install --upgrade pip
         pip install --upgrade buildozer python-for-android cython
 
-    - name: Optional: Regenerate configure scripts if present
+    - name: Regenerate configure scripts if present
       run: |
         if [ -f configure.ac ]; then
           autoreconf --install --force
