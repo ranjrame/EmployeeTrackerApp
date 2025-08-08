@@ -46,7 +46,7 @@ jobs:
        mv cmdline-tools latest
        yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
        $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;26.1.10909125"
-       env::
+      env:
        ANDROID_HOME: $HOME/android-sdk
 
 
