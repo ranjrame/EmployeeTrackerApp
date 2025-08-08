@@ -36,25 +36,19 @@ jobs:
           autoreconf --install --force
         fi
 
-    - name: Install Android SDK (command line tools)
-      env:
-        ANDROID_SDK_ROOT: $HOME/android-sdk
+    - name: Install Android Command-line Tools
       run: |
-        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-        cd $ANDROID_SDK_ROOT/cmdline-tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
-        unzip cmdline-tools.zip
-        mv cmdline-tools latest
-        # Fix nested cmdline-tools directory so bin/ is directly under latest/
-        if [ -d latest/cmdline-tools ]; then
-          mv latest/cmdline-tools/* latest/
-          rmdir latest/cmdline-tools
-        fi
-        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
-        which sdkmanager || echo "sdkmanager not found"
-        ls -l $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/
-        yes | sdkmanager --licenses
-        sdkmanager --install "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+       mkdir -p $HOME/android-sdk/cmdline-tools
+       cd $HOME/android-sdk/cmdline-tools
+       curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+       unzip commandlinetools.zip
+       rm commandlinetools.zip
+       mv cmdline-tools latest
+       yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+       $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;26.1.10909125"
+       env:
+       ANDROID_HOME: $HOME/android-sdk
+
 
     - name: Clean Buildozer build
       run: buildozer android clean
