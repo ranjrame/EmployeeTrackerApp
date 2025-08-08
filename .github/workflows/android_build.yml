@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Employee Tracker APK
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v4
 
     - name: Set up Python
@@ -22,47 +22,52 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y zip unzip openjdk-17-jdk python3-pip git \
-          autoconf automake libtool libtool-bin pkg-config build-essential
+        sudo apt-get install -y \
+          openjdk-17-jdk \
+          unzip \
+          python3-pip \
+          git \
+          libssl-dev \
+          libffi-dev \
+          libsqlite3-dev \
+          zlib1g-dev \
+          libreadline-dev \
+          libgdbm-dev \
+          libbz2-dev \
+          liblzma-dev \
+          libgmp-dev
 
-    - name: Upgrade pip, install Buildozer & dependencies
+    - name: Install Buildozer and Cython
       run: |
         pip install --upgrade pip
-        pip install --upgrade buildozer python-for-android cython
+        pip install buildozer cython
 
-    - name: Regenerate configure scripts if present
+    - name: Install Android SDK & NDK
       run: |
-        if [ -f configure.ac ]; then
-          autoreconf --install --force
-        fi
+        mkdir -p $HOME/android-sdk
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip commandlinetools-linux-9477386_latest.zip -d $HOME/android-sdk/cmdline-tools
+        mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+        yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
+        yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk \
+          "platform-tools" \
+          "platforms;android-31" \
+          "build-tools;31.0.0" \
+          "ndk;23.1.7779620"
 
-    - name: Install Android Command-line Tools
+    - name: Set environment variables
       run: |
-       mkdir -p $HOME/android-sdk/cmdline-tools
-       cd $HOME/android-sdk/cmdline-tools
-       curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-       unzip commandlinetools.zip
-       rm commandlinetools.zip
-       mv cmdline-tools latest
-       yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
-       $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;26.1.10909125"
-      env:
-       ANDROID_HOME: $HOME/android-sdk
+        echo "ANDROIDSDK=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "ANDROIDNDK=$HOME/android-sdk/ndk/23.1.7779620" >> $GITHUB_ENV
+        echo "ANDROIDAPI=31" >> $GITHUB_ENV
+        echo "ANDROIDMINAPI=21" >> $GITHUB_ENV
 
-
-    - name: Clean Buildozer build
-      run: buildozer android clean
-
-    - name: Build APK with Buildozer
-      env:
-        ANDROIDSDK: $HOME/android-sdk
-        ANDROID_SDK_ROOT: $HOME/android-sdk
-        PATH: $HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin:${PATH}
+    - name: Build APK
       run: |
         buildozer android debug
 
-    - name: Upload APK
+    - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
-        name: employee-tracker-apk
+        name: EmployeeTracker-APK
         path: bin/*.apk
